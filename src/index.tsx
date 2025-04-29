@@ -2,8 +2,12 @@ import { NativeModules } from 'react-native';
 
 
 export interface Characteristic {
-  type: string;
-  description: string;
+  uniqueIdentifier: string,
+  type: string,
+  description: string,
+  isNotificationEnabled: boolean,
+  value: any,
+  properties: [string],
 
 }
 
@@ -18,6 +22,7 @@ export interface Accessory {
   bridged: boolean;
   room?: Room;
   services: Array<Service>;
+  characteristics: [Characteristic];
 }
 
 export interface Zone {
@@ -58,6 +63,8 @@ type HomekitType = {
   renameAccessory(oldName: string, newName: string): Promise<Accessory>;
   startSearchingForNewAccessories():void;
   stopSearchingForNewAccessories():void;
+  getPrimaryHome(): Promise<Home>;
+  updateAccessoryPowerState(accessoryName: string, inHome: string, isOn: boolean): Promise<Accessory>;
 };
 
 const { Homekit } = NativeModules;

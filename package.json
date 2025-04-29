@@ -1,6 +1,6 @@
 {
-  "name": "react-native-homekit",
-  "version": "0.2.0",
+  "name": "react-native-smarthome",
+  "version": "0.3.0",
   "description": "homekit",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -13,7 +13,7 @@
     "android",
     "ios",
     "cpp",
-    "react-native-homekit.podspec",
+    "react-native-smarthome.podspec",
     "!lib/typescript/example",
     "!**/__tests__",
     "!**/__fixtures__",
@@ -34,13 +34,13 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/nazrdogan/react-native-homekit",
-  "author": "Nazir Dogan <nazrdogan@gmail.com> (https://github.com/nazrdogan)",
+  "repository": ".",
+  "author": "richinfoai.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nazrdogan/react-native-homekit/issues"
+    "url": "."
   },
-  "homepage": "https://github.com/nazrdogan/react-native-homekit#readme",
+  "homepage": ".",
   "devDependencies": {
     "@commitlint/config-conventional": "^8.3.4",
     "@react-native-community/bob": "^0.15.2",

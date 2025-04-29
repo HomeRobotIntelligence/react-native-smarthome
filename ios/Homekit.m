@@ -40,6 +40,8 @@ RCT_EXTERN_METHOD(renameAccessory:(NSString *)oldName newName:(NSString *)newNam
 
 RCT_EXTERN_METHOD(startSearchingForNewAccessories)
 RCT_EXTERN_METHOD(stopSearchingForNewAccessories)
+RCT_EXTERN_METHOD(getPrimaryHome:(RCTPromiseResolveBlock)resolve withRejecter:(RCTPromiseRejectBlock)reject)RCT_EXTERN_METHOD(updateAccessoryDevelopmentState:(NSString *)accessoryName inHome:(NSString *)inHome isDevelopment:(BOOL)isDevelopment withResolver:(RCTPromiseResolveBlock)resolve withRejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(updateAccessoryPowerState:(NSString *)accessoryName inHome:(NSString *)inHome isOn:(BOOL)isOn withResolver:(RCTPromiseResolveBlock)resolve withRejecter:(RCTPromiseRejectBlock)reject)
 
 
 @end

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "react-native-homekit": ["./src/index"]
+      "react-native-smarthome": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

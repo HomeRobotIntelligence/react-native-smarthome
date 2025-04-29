@@ -193,6 +193,50 @@ class Homekit: RCTEventEmitter , HMHomeManagerDelegate, HMAccessoryBrowserDelega
     func stopSearchingForNewAccessories () -> Void {
         self.accessoryBrowser.stopSearchingForNewAccessories()
     }
+    @objc(getPrimaryHome:withRejecter:)
+    func getPrimaryHome(resolve: @escaping(RCTPromiseResolveBlock), reject: @escaping(RCTPromiseRejectBlock)) -> Void {
+        guard let primaryHome = self.findPrimaryHome() else {
+            reject("error", "Primary home not found", nil);
+            return
+        }
+        resolve(Homekit.transformHome(home: primaryHome))
+    }
+    
+  @objc(updateAccessoryPowerState:inHome:isOn:withResolver:withRejecter:)
+      func updateAccessoryPowerState(accessoryName: String, inHome: String, isOn: Bool, resolve: @escaping(RCTPromiseResolveBlock), reject: @escaping(RCTPromiseRejectBlock)) -> Void {
+          guard let home = self.findHome(name: inHome) else {
+              reject("error", "Home '\(inHome)' not found", nil);
+              return
+          }
+          
+          guard let accessory = self.findAccessoryInHome(name: accessoryName, inHome: home) else {
+              reject("error", "Accessory  '\(accessoryName)' not found", nil);
+              return
+          }
+          
+          // 遍历所有服务查找电源特性
+          var foundPowerService = false
+          for service in accessory.services {
+              if let powerCharacteristic = service.characteristics.first(where: { $0.characteristicType == HMCharacteristicTypePowerState }) {
+                  foundPowerService = true
+                  // 更新电源状态
+                  powerCharacteristic.writeValue(isOn) { error in
+                      if let error = error {
+                          reject("error", error.localizedDescription, error);
+                      } else {
+                          resolve(Homekit.transformAccessory(acc: accessory))
+                      }
+                  }
+                  return
+              }
+          }
+          
+          if !foundPowerService {
+              reject("error", "Power characteristic not found in any service", nil);
+          }
+      }
+    
+    
     //Helper functions
     private func findHome(name: String) -> HMHome? {
         for home in homeManager.homes {
@@ -202,6 +246,17 @@ class Homekit: RCTEventEmitter , HMHomeManagerDelegate, HMAccessoryBrowserDelega
         }
         return nil
     }
+
+    
+    private func findPrimaryHome() -> HMHome? {
+        for home in homeManager.homes {
+            if home.isPrimary {
+                return home
+            }
+        }
+        return nil
+    }
+
     private func findRoom(name: String, inHome: HMHome) -> HMRoom? {
         for room in inHome.rooms {
             if room.name == name {
@@ -250,7 +305,7 @@ class Homekit: RCTEventEmitter , HMHomeManagerDelegate, HMAccessoryBrowserDelega
     private static func transformRooms(nrooms: [HMRoom]) -> [Any] {
         var rooms: [Any] = []
         for room in nrooms {
-            rooms.append(transformRoom(room: room, skipAccessories:true))
+            rooms.append(transformRoom(room: room, skipAccessories:false))
         }
         return rooms;
     }
@@ -275,6 +330,8 @@ class Homekit: RCTEventEmitter , HMHomeManagerDelegate, HMAccessoryBrowserDelega
         return [
             "name": acc.name,
             "bridged": acc.isBridged,
+            "uniqueIdentifier": acc.uniqueIdentifier,
+            "category": acc.category.localizedDescription,
             "services": transformServices(nservices: acc.services),
         ]
     }
@@ -303,6 +360,10 @@ class Homekit: RCTEventEmitter , HMHomeManagerDelegate, HMAccessoryBrowserDelega
     private static func transformService(service: HMService) -> [String : Any] {
         return [
             "name": service.name,
+            "serviceType":service.serviceType,
+            "localizedDescription": service.localizedDescription,
+            "isUserInteractive": service.isUserInteractive,
+            "characteristics": transformCharacteristics(ncharacteristics: service.characteristics)
         ]
     }
     
@@ -315,8 +376,12 @@ class Homekit: RCTEventEmitter , HMHomeManagerDelegate, HMAccessoryBrowserDelega
     }
     private static func transformCharacteristic(characteristic: HMCharacteristic) -> [String : Any] {
         return [
+            "uniqueIdentifier": characteristic.uniqueIdentifier,
             "type": characteristic.characteristicType,
             "description": characteristic.localizedDescription,
+            "isNotificationEnabled": characteristic.isNotificationEnabled,
+            "value": characteristic.value as Any,
+            "properties": characteristic.properties,
         ]
     }
     

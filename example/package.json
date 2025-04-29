@@ -1,6 +1,6 @@
 {
-  "name": "react-native-homekit-example",
-  "description": "Example app for react-native-homekit",
+  "name": "react-native-smarthome-example",
+  "description": "Example app for react-native-smarthome",
   "version": "0.0.1",
   "private": true,
   "scripts": {

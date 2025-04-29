@@ -1,6 +1,6 @@
-import * as React from 'react';
+import React from 'react';
 import { StyleSheet, View, Button, NativeEventEmitter, NativeModules } from 'react-native';
-import HomeKit from 'react-native-homekit';
+import HomeKit from 'react-native-smarthome';
 
 export default function App() {
   const myModuleEvt = new NativeEventEmitter(NativeModules.Homekit)

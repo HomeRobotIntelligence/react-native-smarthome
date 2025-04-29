@@ -1,4 +1,4 @@
-# react-native-homekit
+# react-native-smarthome
 
 
 <img src="https://i.imgur.com/JK2qolE.jpg" alt="Homekit">
@@ -8,13 +8,13 @@
 ## Installation
 
 ```sh
-npm install react-native-homekit
+npm install react-native-smarthome
 ```
 
 ## Usage
 
 ```js
-import Homekit from "react-native-homekit";
+import Homekit from "react-native-smarthome";
 
 // ...
 
