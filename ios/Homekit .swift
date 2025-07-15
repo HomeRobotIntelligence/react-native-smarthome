@@ -333,6 +333,7 @@ class Homekit: RCTEventEmitter , HMHomeManagerDelegate, HMAccessoryBrowserDelega
             "uniqueIdentifier": acc.uniqueIdentifier,
             "category": acc.category.localizedDescription,
             "services": transformServices(nservices: acc.services),
+            "isReady": acc.isReachable,
         ]
     }
     
