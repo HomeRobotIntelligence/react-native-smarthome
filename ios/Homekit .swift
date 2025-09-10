@@ -1,7 +1,7 @@
 import  HomeKit
 
 @objc(Homekit)
-class Homekit: RCTEventEmitter , HMHomeManagerDelegate, HMAccessoryBrowserDelegate {
+class Homekit: RCTEventEmitter , HMHomeManagerDelegate, HMAccessoryBrowserDelegate, HMAccessoryDelegate {
     var homeManager = HMHomeManager()
     let accessoryBrowser = HMAccessoryBrowser()
     var discoveredAccessories: [HMAccessory] = []
@@ -16,7 +16,7 @@ class Homekit: RCTEventEmitter , HMHomeManagerDelegate, HMAccessoryBrowserDelega
         return true
     }
     override func supportedEvents() -> [String]! {
-      return ["findNewAccessory","removeNewAccessory"]
+      return ["findNewAccessory","removeNewAccessory","accessoryStateChanged"]
     }
     @objc(addHome:withResolver:withRejecter:)
     func addHome(name: String, resolve: @escaping(RCTPromiseResolveBlock), reject: @escaping(RCTPromiseRejectBlock)) -> Void {
@@ -200,6 +200,23 @@ class Homekit: RCTEventEmitter , HMHomeManagerDelegate, HMAccessoryBrowserDelega
             return
         }
         resolve(Homekit.transformHome(home: primaryHome))
+    }
+    
+    @objc(startMonitoringAccessoryState:inHome:withResolver:withRejecter:)
+    func startMonitoringAccessoryState(accessoryName: String, inHome: String, resolve: @escaping(RCTPromiseResolveBlock), reject: @escaping(RCTPromiseRejectBlock)) -> Void {
+        guard let home = self.findHome(name: inHome) else {
+            reject("error", "Home '\(inHome)' not found", nil);
+            return
+        }
+        
+        guard let accessory = self.findAccessoryInHome(name: accessoryName, inHome: home) else {
+            reject("error", "Accessory '\(accessoryName)' not found", nil);
+            return
+        }
+        
+        // 设置设备为delegate以监听状态变化
+        accessory.delegate = self
+        resolve(["message": "Started monitoring accessory state"])
     }
     
   @objc(updateAccessoryPowerState:inHome:isOn:withResolver:withRejecter:)
@@ -393,5 +410,51 @@ class Homekit: RCTEventEmitter , HMHomeManagerDelegate, HMAccessoryBrowserDelega
     }
     func accessoryBrowser(_ browser: HMAccessoryBrowser, didRemoveNewAccessory accessory: HMAccessory) {
          self.sendEvent(withName: "removeNewAccessory", body: ["accessory": Homekit.transformAccessory(acc: accessory)] )
+    }
+    
+    // HMAccessoryDelegate methods
+    func accessory(_ accessory: HMAccessory, service: HMService, didUpdateValueFor characteristic: HMCharacteristic) {
+        // 当设备特性值发生变化时发送事件
+        self.sendEvent(withName: "accessoryStateChanged", body: [
+            "accessory": Homekit.transformAccessory(acc: accessory),
+            "service": Homekit.transformService(service: service),
+            "characteristic": Homekit.transformCharacteristic(characteristic: characteristic),
+            "changeType": "characteristicValueUpdated"
+        ])
+    }
+    
+    func accessory(_ accessory: HMAccessory, didUpdateNameFor service: HMService) {
+        // 当服务名称更新时发送事件
+        self.sendEvent(withName: "accessoryStateChanged", body: [
+            "accessory": Homekit.transformAccessory(acc: accessory),
+            "service": Homekit.transformService(service: service),
+            "changeType": "serviceNameUpdated"
+        ])
+    }
+    
+    func accessory(_ accessory: HMAccessory, didUpdateAssociatedServiceTypeFor service: HMService) {
+        // 当服务关联类型更新时发送事件
+        self.sendEvent(withName: "accessoryStateChanged", body: [
+            "accessory": Homekit.transformAccessory(acc: accessory),
+            "service": Homekit.transformService(service: service),
+            "changeType": "serviceTypeUpdated"
+        ])
+    }
+    
+    func accessoryDidUpdateReachability(_ accessory: HMAccessory) {
+        // 当设备可达性状态变化时发送事件
+        self.sendEvent(withName: "accessoryStateChanged", body: [
+            "accessory": Homekit.transformAccessory(acc: accessory),
+            "changeType": "reachabilityUpdated"
+        ])
+    }
+    
+    func accessory(_ accessory: HMAccessory, didUpdateNameFor characteristic: HMCharacteristic) {
+        // 当特性名称更新时发送事件
+        self.sendEvent(withName: "accessoryStateChanged", body: [
+            "accessory": Homekit.transformAccessory(acc: accessory),
+            "characteristic": Homekit.transformCharacteristic(characteristic: characteristic),
+            "changeType": "characteristicNameUpdated"
+        ])
     }
 }

@@ -8,21 +8,23 @@ export interface Characteristic {
   isNotificationEnabled: boolean,
   value: any,
   properties: [string],
-
 }
 
 export interface Service {
   name: string;
-  type: string;
+  serviceType: string;
+  localizedDescription: string;
+  isUserInteractive: boolean;
   characteristics: Array<Characteristic>;
 }
 
 export interface Accessory {
   name: string;
   bridged: boolean;
-  room?: Room;
+  uniqueIdentifier: string;
+  category: string;
   services: Array<Service>;
-  characteristics: [Characteristic];
+  isReady: boolean;
 }
 
 export interface Zone {
@@ -37,10 +39,17 @@ export interface Room {
 
 export interface Home {
   name: string;
-  primary: boolean;
+  isPrimary: boolean;
   rooms: Array<Room>;
   accessories: Array<Accessory>;
   zones: Array<Zone>;
+}
+
+export interface AccessoryStateChangeEvent {
+  accessory: Accessory;
+  service?: Service;
+  characteristic?: Characteristic;
+  changeType?: 'characteristicValueUpdated' | 'serviceNameUpdated' | 'serviceTypeUpdated' | 'reachabilityUpdated' | 'characteristicNameUpdated';
 }
 type HomekitType = {
   addHome(homeName: string): Promise<Home>;
@@ -65,6 +74,7 @@ type HomekitType = {
   stopSearchingForNewAccessories():void;
   getPrimaryHome(): Promise<Home>;
   updateAccessoryPowerState(accessoryName: string, inHome: string, isOn: boolean): Promise<Accessory>;
+  startMonitoringAccessoryState(accessoryName: string, inHome: string): Promise<{message: string}>;
 };
 
 const { Homekit } = NativeModules;
